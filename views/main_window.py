@@ -32,8 +32,9 @@ from PySide6.QtWidgets import (
 )
 
 from core import general_settings as _gs
-from core.i18n import (LANGUAGE_NAMES, SYSTEM, available_languages,
-                       current_language, resolve_language, set_language, tr)
+from core.i18n import (DEFAULT_LANGUAGE, LANGUAGE_NAMES, SYSTEM,
+                       available_languages, current_language,
+                       resolve_language, set_language, tr)
 from views.theme import style as theme_style
 from core.units import fmt_pair
 from views.filedialogs import file_dialogs
@@ -1800,6 +1801,15 @@ class MainWindow(QMainWindow):
             "profile panel."))
         action_profile.triggered.connect(self._on_terrain_profile)
         tools_menu.addAction(action_profile)
+        # Construction takeoff — the tagged model becomes a material list
+        # (core/takeoff.py): the Thai build's estimating door.
+        self._act_takeoff = QAction(tr("Construction takeoff…"), self)
+        self._act_takeoff.setStatusTip(tr(
+            "Materials to order from the tagged BIM model: bricks, cement, "
+            "sand, gravel, steel, formwork, paint, tiles and roof sheets, "
+            "at Thai standard rates."))
+        self._act_takeoff.triggered.connect(self._on_takeoff)
+        tools_menu.addAction(self._act_takeoff)
         tools_menu.addSeparator()
         action_cancel = QAction(tr("Cancel current tool"), self)
         action_cancel.setStatusTip(tr(
@@ -1975,7 +1985,7 @@ class MainWindow(QMainWindow):
         lang_menu = parent_menu.addMenu(tr("Language"))
         group = QActionGroup(self)
         group.setExclusive(True)
-        chosen = str(QSettings().value("language") or SYSTEM)
+        chosen = str(QSettings().value("language") or DEFAULT_LANGUAGE)
         for code in [SYSTEM] + available_languages():
             if code == SYSTEM:
                 action = QAction(tr("Same as the system"), self)
@@ -9351,6 +9361,30 @@ class MainWindow(QMainWindow):
         self.viewport.camera.set_view("top")
         self.viewport.camera.fit_to(mn, mx)
         self.viewport.update()
+
+    def _on_takeoff(self) -> None:
+        """Tools ▸ Construction takeoff — the material list dialog. Only
+        tagged BIM objects are measured (the IFC export's own rule); with
+        nothing tagged, point at the BIM panel instead of an empty bill."""
+        self.viewport.end_group_edit()
+        from core.bim import collect_objects
+        if not collect_objects(self.viewport.scene):
+            QMessageBox.information(
+                self, tr("Construction takeoff"),
+                tr("Nothing to take off yet: tag geometry in the BIM panel "
+                   "first (walls, slabs, columns…)."))
+            self.bim_tray.show()
+            self.bim_tray.raise_()
+            return
+        from views.takeoff_dialog import TakeoffDialog
+        dlg = getattr(self, "_takeoff_dialog", None)
+        if dlg is None:
+            dlg = TakeoffDialog(self)
+            self._takeoff_dialog = dlg
+        dlg.recompute()
+        dlg.show()
+        dlg.raise_()
+        dlg.activateWindow()
 
     def _on_export_ifc(self) -> None:
         self.viewport.end_group_edit()

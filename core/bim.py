@@ -40,6 +40,18 @@ IFC_CLASSES = [
     "IfcReinforcingBar",
 ]
 
+#: Human names of the classes — English source strings the BIM panel
+#: translates, shown as «IfcWall — ผนัง» so the IFC key stays visible
+#: while the name speaks the running language.
+IFC_CLASS_NAMES = {
+    "IfcWall": "Wall", "IfcSlab": "Slab", "IfcColumn": "Column",
+    "IfcBeam": "Beam", "IfcFooting": "Footing", "IfcRoof": "Roof",
+    "IfcStair": "Stair", "IfcRamp": "Ramp", "IfcDoor": "Door",
+    "IfcWindow": "Window", "IfcRailing": "Railing",
+    "IfcCovering": "Covering", "IfcPile": "Pile", "IfcMember": "Member",
+    "IfcSpace": "Space", "IfcReinforcingBar": "Reinforcing bar",
+}
+
 #: Density of reinforcing steel, kg/m³ — the bar's weight is its volume
 #: times this, as a takeoff bills it.
 STEEL_DENSITY = 7850.0

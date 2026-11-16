@@ -46,9 +46,14 @@ def is_rtl(lang: str | None) -> bool:
     return str(lang or "").split("-")[0].split("_")[0].lower() in RTL_LANGUAGES
 
 
-#: The saved choice that follows the operating system's language (#818);
-#: also what an unset choice means.
+#: The saved choice that follows the operating system's language (#818).
 SYSTEM = "system"
+
+#: This build's UI language when nothing has been chosen yet: Thai.
+#: main._init_language, the Window ▸ Language menu and Preferences read
+#: an unset «language» as this; «Same as the system» still follows the
+#: OS, and a saved choice always wins.
+DEFAULT_LANGUAGE = "th"
 
 _catalog: dict[str, str] = {}
 _lang = "en"

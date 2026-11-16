@@ -44,6 +44,7 @@ from PySide6.QtWidgets import (
 
 from core import _native
 from core import general_settings as _gs
+from core.i18n import DEFAULT_LANGUAGE as _DEFAULT_LANGUAGE
 from core.i18n import LANGUAGE_NAMES as _LANGUAGE_NAMES
 from core.i18n import SYSTEM as SYSTEM_LANGUAGE
 from core.i18n import (available_languages, current_language,
@@ -85,7 +86,7 @@ class PreferencesDialog(QDialog):
         self._lang.addItem(tr("Same as the system"), SYSTEM_LANGUAGE)
         for code in available_languages():
             self._lang.addItem(_LANGUAGE_NAMES.get(code, code), code)
-        pending = str(st.value("language") or SYSTEM_LANGUAGE)
+        pending = str(st.value("language") or _DEFAULT_LANGUAGE)
         self._lang.setCurrentIndex(max(0, self._lang.findData(pending)))
         form.addRow(tr("Language:"), self._lang)
 
@@ -979,7 +980,7 @@ class PreferencesDialog(QDialog):
         # rewrites the stored value — no restart note for a no-op (nor for
         # "Same as the system" when the system's is the running language).
         code = self._lang.currentData()
-        saved = str(st.value("language") or SYSTEM_LANGUAGE)
+        saved = str(st.value("language") or _DEFAULT_LANGUAGE)
         if code != saved:
             st.setValue("language", code)
             lang = resolve_language(code)

@@ -4588,8 +4588,11 @@ class BimPanel(QWidget):
 
         row = QHBoxLayout()
         self.class_box = QComboBox()
-        from core.bim import IFC_CLASSES
-        self.class_box.addItems(IFC_CLASSES)
+        from core.bim import IFC_CLASSES, IFC_CLASS_NAMES
+        # «IfcWall — ผนัง»: the IFC key stays visible, the human name
+        # speaks the running language; the class itself rides in the data.
+        for cls in IFC_CLASSES:
+            self.class_box.addItem(f"{cls} — {tr(IFC_CLASS_NAMES[cls])}", cls)
         self.name_edit = QLineEdit()
         self.name_edit.setPlaceholderText(tr("Name (e.g. Wall axis A)"))
         row.addWidget(self.class_box)
@@ -4641,6 +4644,18 @@ class BimPanel(QWidget):
             "The takeoff table — the bridge to IngePresupuestos"))
         exp.clicked.connect(self._on_export_csv)
         lay.addWidget(exp)
+        take = QPushButton(tr("Construction takeoff…"))
+        take.setToolTip(tr(
+            "Materials to order: bricks, cement, sand, steel, paint, tiles, "
+            "roof — Thai standard rates, editable"))
+        take.clicked.connect(self._window._on_takeoff)
+        lay.addWidget(take)
+        sug = QPushButton(tr("Suggest BIM tags…"))
+        sug.setToolTip(tr(
+            "Propose IFC classes for untagged groups from their shape — "
+            "you review and confirm"))
+        sug.clicked.connect(self._on_suggest)
+        lay.addWidget(sug)
         self._objects: list = []
         self._containers: list = []
         self.refresh()
@@ -4684,7 +4699,7 @@ class BimPanel(QWidget):
         scene = self._scene()
         faces = [s for s in scene.selection if isinstance(s, Face)]
         groups = [s for s in scene.selection if isinstance(s, Group)]
-        cls = self.class_box.currentText()
+        cls = self.class_box.currentData()
         name = self.name_edit.text().strip()
         tagged = 0
         for g in groups:
@@ -4704,7 +4719,7 @@ class BimPanel(QWidget):
     def _on_active_toggle(self, checked: bool) -> None:
         scene = self._scene()
         if checked:
-            cls = self.class_box.currentText()
+            cls = self.class_box.currentData()
             name = (self.name_edit.text().strip()
                     or cls.removeprefix("Ifc"))
             # Class + name only: each draw commit allocates its own object id
@@ -4790,6 +4805,17 @@ class BimPanel(QWidget):
         scene.selection.add(g)
         scene.bump_view()
         vp.update()
+
+    def _on_suggest(self) -> None:
+        from views.tag_suggest_dialog import TagSuggestDialog
+        dlg = getattr(self, "_suggest_dialog", None)
+        if dlg is None:
+            dlg = TagSuggestDialog(self._window)
+            self._suggest_dialog = dlg
+        dlg.refresh()
+        dlg.show()
+        dlg.raise_()
+        dlg.activateWindow()
 
     def _on_export_csv(self) -> None:
         from PySide6.QtWidgets import QFileDialog

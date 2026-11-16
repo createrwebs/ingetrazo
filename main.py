@@ -47,13 +47,15 @@ from core import i18n
 
 
 def _init_language() -> None:
-    """Load the saved UI language, or follow the system's.
+    """Load the saved UI language, this build's default, or the system's.
 
-    Reads the persisted choice from :class:`QSettings`; with none yet, or
-    "Same as the system" chosen (#818), the OS display language picks the
-    closest catalog (see :func:`core.i18n.language_for_locales`).
+    Reads the persisted choice from :class:`QSettings`; with none yet the
+    build default (:data:`core.i18n.DEFAULT_LANGUAGE`, Thai) applies, and
+    "Same as the system" chosen (#818) lets the OS display language pick
+    the closest catalog (see :func:`core.i18n.language_for_locales`).
     """
-    lang = i18n.resolve_language(QSettings().value("language"))
+    lang = i18n.resolve_language(
+        QSettings().value("language") or i18n.DEFAULT_LANGUAGE)
     i18n.set_language(lang)
     _install_qt_translator(lang)
     # Arabic (#1067) and the other right-to-left languages mirror the

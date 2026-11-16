@@ -753,6 +753,9 @@ def save_scene(scene, path: Path) -> dict:
     units = getattr(scene, "units", None)
     if isinstance(units, dict) and units != {"length": "m", "precision": 2}:
         payload["units"] = dict(units)     # only when not the metre default
+    takeoff = getattr(scene, "takeoff", None)
+    if takeoff:
+        payload["takeoff"] = dict(takeoff)  # only when rates were set
     pdata = getattr(scene, "plugin_data", None)
     if pdata:
         # Extensions' data: JSON-safe by contract; a value that is not is
@@ -1392,6 +1395,8 @@ def _load_into_inner(scene, path: Path, progress=None) -> None:
     scene.views_home = dict(views) if isinstance(views, dict) else None
     from core.units import model_units_of
     scene.units = model_units_of(payload)   # validated; absent = metres
+    tk = payload.get("takeoff")
+    scene.takeoff = dict(tk) if isinstance(tk, dict) else {}
     pdata = payload.get("plugin_data")
     scene.plugin_data = dict(pdata) if isinstance(pdata, dict) else {}
     scales = payload.get("custom_scales")

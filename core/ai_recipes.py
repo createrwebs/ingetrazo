@@ -80,6 +80,20 @@ con un marco de vista y aparece sola en las pestañas de láminas. Borrar: \
 scene.compositions.remove(c) (queda al menos una si había).
 - CAPA / ETIQUETA: ly = Layer("Muros"); layers.append(ly); g.layer = \
 "Muros". En layers solo van objetos Layer, nunca textos.
+- TAG BIM (para metrado/despiece): bim.tag_faces([caras], "IfcWall", "Muro A", \
+bim.next_object_id(scene)) o bim.tag_group(g, "IfcColumn", "C1"). Clases: IfcWall, \
+IfcSlab, IfcColumn, IfcBeam, IfcFooting, IfcRoof, IfcDoor, IfcWindow, IfcSpace, \
+IfcReinforcingBar. Una casa: muros IfcWall, losa IfcSlab, columnas IfcColumn, \
+techo IfcRoof, puertas/ventanas IfcDoor/IfcWindow, y cada habitación (volumen) IfcSpace.
+- DESPIECE / METRADO (materiales): from core.takeoff import compute_takeoff, \
+takeoff_csv; res = compute_takeoff(scene); print(takeoff_csv(res)) — lista de \
+materiales (ladrillos, cemento, arena, acero, pintura, tejas) con tasas tailandesas. \
+Solo mide geometría TAGGEADA. res.rows / res.shopping / res.warnings.
+- HABITACIONES / ACABADOS: from core.rooms import room_schedule, paint_schedule, \
+openings_schedule, rebar_schedule; print(room_schedule(scene)) — áreas y acabados \
+por habitación (IfcSpace); paint_schedule agrupa por color/material real.
+- SUGERIR TAGS: from core.bim_suggest import suggestions; print(suggestions(scene)) \
+— propone clases IFC para grupos sin tag (el usuario confirma en el diálogo).
 - print(...) para reportar datos (breve: el resultado viaja cada turno)."""
 
 #: What the engine guarantees, and what the model should not waste turns on.

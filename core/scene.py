@@ -124,6 +124,10 @@ class Scene:
     #: every length is shown in, plus the decimals. Travels in the .igz;
     #: read through ``core.units`` (``fmt_len`` & co.).
     units: dict = field(default_factory=lambda: {"length": "m", "precision": 2})
+    #: Material takeoff options (core/takeoff.py): mixes, rates, waste —
+    #: the document's own estimating basis, travelling in the .igz like
+    #: the units. Empty = the engine defaults.
+    takeoff: dict = field(default_factory=dict)
     #: Extensions' own document data, one JSON-safe value per extension key
     #: (``views.extension_api.ExtensionApp.document_data``). Travels in the
     #: .igz; the core never reads it. Changed through

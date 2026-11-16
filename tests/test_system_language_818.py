@@ -108,10 +108,11 @@ class _Win(QWidget):
         self._rest_actions = {}
 
 
-def test_preferences_offers_the_system_language_first_and_by_default(prefs):
+def test_preferences_offers_the_system_language_first_and_the_build_default(prefs):
     dlg = PreferencesDialog(_Win())
     assert dlg._lang.itemData(0) == i18n.SYSTEM
-    assert dlg._lang.currentData() == i18n.SYSTEM     # nothing saved yet
+    # Nothing saved yet: this build's default (Thai), not the OS's French.
+    assert dlg._lang.currentData() == i18n.DEFAULT_LANGUAGE
 
 
 def test_going_back_to_the_system_language_is_saved(prefs):
@@ -143,8 +144,9 @@ def test_pinning_another_language_over_the_system_one_asks_a_restart(prefs):
 def test_startup_resolves_the_saved_choice(saved, tmp_path, monkeypatch,
                                            system_is_french):
     """main._init_language runs the same resolution as the menus: an
-    unset choice or "system" starts in the OS language, never crashes
-    nor activates a catalog literally named "system"."""
+    unset choice starts in this build's default (Thai), "system" in the
+    OS language, a pinned one stays; never crashes nor activates a
+    catalog literally named "system"."""
     import main
     path = tmp_path / "start.ini"
     st = QSettings(str(path), QSettings.IniFormat)
@@ -158,7 +160,8 @@ def test_startup_resolves_the_saved_choice(saved, tmp_path, monkeypatch,
     before = i18n.current_language()
     try:
         main._init_language()
-        expected = "de" if saved == "de" else "fr"
+        expected = {"de": "de", i18n.SYSTEM: "fr"}.get(
+            saved, i18n.DEFAULT_LANGUAGE)
         assert i18n.current_language() == expected
         assert installed == [expected]
     finally:

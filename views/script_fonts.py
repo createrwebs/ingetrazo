@@ -23,6 +23,9 @@ import sys
 #: Windows 7; Noto Sans Lao when the user installed it.
 SCRIPT_FONTS: dict[str, tuple[str, ...]] = {
     "lo": ("Leelawadee UI", "Lao UI", "Noto Sans Lao UI", "Noto Sans Lao"),
+    # Thai — this build's default language: the same Leelawadee UI first
+    # (it carries Thai too), Tahoma and Noto Sans Thai as the fallbacks.
+    "th": ("Leelawadee UI", "Tahoma", "Noto Sans Thai"),
 }
 
 #: Platforms whose own font fallback breaks these scripts apart.
